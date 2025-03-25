@@ -11,7 +11,7 @@ variable "image_name" {
   type    = string
   default = "yugabyte-db"
 }
-
+ 
 variable "tags" {
   type    = list(string)
   default = ["latest"]
