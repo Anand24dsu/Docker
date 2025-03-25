@@ -1,20 +1,23 @@
 pipeline {
     agent any
 
+    environment {
+        HOME = '/var/lib/jenkins'  // Or the correct home directory
+    }
+
     stages {
         stage('Initialize Packer') {
             steps {
+                sh 'echo "HOME is: $HOME"' // Good for debugging!
                 sh 'packer init .'
             }
         }
         stage('Build YugabyteDB Image') {
             steps {
                 script {
-                    // Build the image, passing variables if needed.
-                    sh "packer build  yugabyte_docker.pkr.hcl"
+                    sh "packer build yugabyte_docker.pkr.hcl"
                 }
             }
         }
     }
-
 }
