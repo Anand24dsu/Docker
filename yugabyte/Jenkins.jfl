@@ -6,20 +6,26 @@ pipeline {
     }
 
     stages {
+
         stage('Initialize Packer') {
             steps {
-                sh 'echo "HOME is: $HOME"'
-                sh 'whoami'
-                sh 'ls -lrt'
-                sh 'cd yugabyte'
-                sh 'packer init yugabyte_docker.pkr.hcl .' // Back to the original command
+                sh '''
+                echo "HOME is: $HOME"
+                whoami
+                ls -lrt
+                cd yugabyte
+                packer --version
+                packer init yugabyte_docker.pkr.hcl
+                '''
             }
         }
+
         stage('Build YugabyteDB Image') {
             steps {
-                script {
-                    sh "packer build yugabyte_docker.pkr.hcl"
-                }
+                sh '''
+                cd yugabyte
+                packer build yugabyte_docker.pkr.hcl
+                '''
             }
         }
     }
