@@ -1,0 +1,20 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Initialize Packer') {
+            steps {
+                sh 'packer init .'
+            }
+        }
+        stage('Build YugabyteDB Image') {
+            steps {
+                script {
+                    // Build the image, passing variables if needed.
+                    sh "packer build  yugabyte_docker.pkr.hcl"
+                }
+            }
+        }
+    }
+
+}
