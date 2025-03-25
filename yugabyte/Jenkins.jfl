@@ -11,6 +11,7 @@ pipeline {
                 sh 'echo "HOME is: $HOME"'
                 sh 'whoami'
                 sh 'ls -lrt'
+                sh 'cd yugabyte'
                 sh 'packer init .' // Back to the original command
             }
         }
