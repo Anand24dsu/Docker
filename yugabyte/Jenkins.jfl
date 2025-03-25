@@ -12,7 +12,7 @@ pipeline {
                 sh 'whoami'
                 sh 'ls -lrt'
                 sh 'cd yugabyte'
-                sh 'packer init .' // Back to the original command
+                sh 'packer init yugabyte_docker.pkr.hcl .' // Back to the original command
             }
         }
         stage('Build YugabyteDB Image') {
