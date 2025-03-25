@@ -1,0 +1,120 @@
+version: "3.8"
+
+services:
+  # YB-Master 1
+  yb-master-1:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-master-1
+    networks:
+      - yb_network
+    ports:
+      - "7000:7000"  # Master UI
+      - "7100:7100"  # Master RPC
+    command: >
+      /home/yugabyte/bin/yb-master
+      --fs_data_dirs=/mnt/data
+      --master_addresses=yb-master-1:7100,yb-master-2:7100,yb-master-3:7100
+      --rpc_bind_addresses=yb-master-1:7100
+
+  # YB-Master 2
+  yb-master-2:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-master-2
+    networks:
+      - yb_network
+    ports:
+      - "7001:7000"
+      - "7101:7100"
+    command: >
+      /home/yugabyte/bin/yb-master
+      --fs_data_dirs=/mnt/data
+      --master_addresses=yb-master-1:7100,yb-master-2:7100,yb-master-3:7100
+      --rpc_bind_addresses=yb-master-2:7100
+
+  # YB-Master 3
+  yb-master-3:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-master-3
+    networks:
+      - yb_network
+    ports:
+      - "7002:7000"
+      - "7102:7100"
+    command: >
+      /home/yugabyte/bin/yb-master
+      --fs_data_dirs=/mnt/data
+      --master_addresses=yb-master-1:7100,yb-master-2:7100,yb-master-3:7100
+      --rpc_bind_addresses=yb-master-3:7100
+
+  # YB-TServer 1
+  yb-tserver-1:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-tserver-1
+    networks:
+      - yb_network
+    ports:
+      - "9000:9000"  # TServer UI
+      - "9100:9100"  # TServer RPC
+      - "5433:5433"  # YCQL API
+      - "9042:9042"  # YSQL API
+      - "6379:6379"  # YEDIS API
+    depends_on:
+      - yb-master-1
+      - yb-master-2
+      - yb-master-3
+    command: >
+      /home/yugabyte/bin/yb-tserver
+      --fs_data_dirs=/mnt/data
+      --tserver_master_addrs=yb-master-1:7100,yb-master-2:7100,yb-master-3:7100
+      --rpc_bind_addresses=yb-tserver-1:9100
+
+  # YB-TServer 2
+  yb-tserver-2:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-tserver-2
+    networks:
+      - yb_network
+    ports:
+      - "9001:9000"
+      - "9101:9100"
+      - "5434:5433"
+      - "9043:9042"
+      - "6380:6379"
+    depends_on:
+      - yb-master-1
+      - yb-master-2
+      - yb-master-3
+    command: >
+      /home/yugabyte/bin/yb-tserver
+      --fs_data_dirs=/mnt/data
+      --tserver_master_addrs=yb-master-1:7100,yb-master-2:7100,yb-master-3:7100
+      --rpc_bind_addresses=yb-tserver-2:9100
+
+  # YB-TServer 3
+  yb-tserver-3:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-tserver-3
+    networks:
+      - yb_network
+    ports:
+      - "9002:9000"
+      - "9102:9100"
+      - "5435:5433"
+      - "9044:9042"
+      - "6381:6379"
+    depends_on:
+      - yb-master-1
+      - yb-master-2
+      - yb-master-3
+    command: >
+      /home/yugabyte/bin/yb-tserver
+      --fs_data_dirs=/mnt/data
+      --tserver_master_addrs=yb-master-1:7100,yb-master-2:7100,yb-master-3:7100
+      --rpc_bind_addresses=yb-tserver-3:9100
+
+networks:
+  yb_network:
+    driver: bridge
+
+
+

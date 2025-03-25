@@ -1,0 +1,85 @@
+version: "3.8"
+
+services:
+  yb-master-1:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-master-1
+    networks:
+      - yb_network
+    ports:
+      - "7000:7000"  # Yugabyte UI
+      - "7100:7100"
+    command: >
+      bash -c "yugabyted start --daemon=false --listen=yb-master-1 --advertise_address=yb-master-1 --join=yb-master-1,yb-master-2,yb-master-3"
+
+  yb-master-2:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-master-2
+    networks:
+      - yb_network
+    ports:
+      - "7001:7000"
+      - "7101:7100"
+    command: >
+      bash -c "yugabyted start --daemon=false --listen=yb-master-2 --advertise_address=yb-master-2 --join=yb-master-1,yb-master-2,yb-master-3"
+
+  yb-master-3:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-master-3
+    networks:
+      - yb_network
+    ports:
+      - "7002:7000"
+      - "7102:7100"
+    command: >
+      bash -c "yugabyted start --daemon=false --listen=yb-master-3 --advertise_address=yb-master-3 --join=yb-master-1,yb-master-2,yb-master-3"
+
+  yb-tserver-1:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-tserver-1
+    networks:
+      - yb_network
+    ports:
+      - "9000:9000"
+      - "5433:5433"
+    depends_on:
+      - yb-master-1
+      - yb-master-2
+      - yb-master-3
+    command: >
+      bash -c "yugabyted start --daemon=false --listen=yb-tserver-1 --advertise_address=yb-tserver-1 --join=yb-master-1,yb-master-2,yb-master-3"
+
+  yb-tserver-2:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-tserver-2
+    networks:
+      - yb_network
+    ports:
+      - "9001:9000"
+      - "5434:5433"
+    depends_on:
+      - yb-master-1
+      - yb-master-2
+      - yb-master-3
+    command: >
+      bash -c "yugabyted start --daemon=false --listen=yb-tserver-2 --advertise_address=yb-tserver-2 --join=yb-master-1,yb-master-2,yb-master-3"
+
+  yb-tserver-3:
+    image: yugabytedb/yugabyte:latest
+    container_name: yb-tserver-3
+    networks:
+      - yb_network
+    ports:
+      - "9002:9000"
+      - "5435:5433"
+    depends_on:
+      - yb-master-1
+      - yb-master-2
+      - yb-master-3
+    command: >
+      bash -c "yugabyted start --daemon=false --listen=yb-tserver-3 --advertise_address=yb-tserver-3 --join=yb-master-1,yb-master-2,yb-master-3"
+
+networks:
+  yb_network:
+    driver: bridge
+
