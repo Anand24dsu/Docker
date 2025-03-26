@@ -7,33 +7,30 @@ pipeline {
 
     stages {
 
+        stage('Setup Permissions') {
+            steps {
+                sh '''
+                echo "Adding Jenkins to the Docker group..."
+                sudo usermod -aG docker jenkins
+                sudo systemctl restart jenkins
+                '''
+            }
+        }
+
+        stage('Login to Docker') {
+            steps {
+                sh '''
+                echo "Logging in to Docker..."
+                docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+                '''
+            }
+        }
+
         stage('Initialize Terraform') {
             steps {
                 sh '''
-                echo "HOME is: $HOME"
-                whoami
-                ls -lrt
                 cd yugabyte
-                terraform --version
                 terraform init
-                '''
-            }
-        }
-
-        stage('Validate Terraform Configuration') {
-            steps {
-                sh '''
-                cd yugabyte
-                terraform validate
-                '''
-            }
-        }
-
-        stage('Plan Terraform Changes') {
-            steps {
-                sh '''
-                cd yugabyte
-                terraform plan -out=tfplan
                 '''
             }
         }
@@ -42,10 +39,9 @@ pipeline {
             steps {
                 sh '''
                 cd yugabyte
-                terraform apply -auto-approve tfplan
+                terraform apply -auto-approve
                 '''
             }
         }
     }
 }
-
