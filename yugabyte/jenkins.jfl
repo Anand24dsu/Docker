@@ -18,24 +18,6 @@ pipeline {
             }
         }
 
-        stage('Restart Jenkins') {
-            steps {
-                sh '''
-                echo "Restarting Jenkins to apply group changes..."
-                sudo systemctl restart jenkins
-                '''
-            }
-        }
-
-        stage('Login to Docker') {
-            steps {
-                sh '''
-                echo "Logging in to Docker..."
-                docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-                '''
-            }
-        }
-
         stage('Initialize Terraform') {
             steps {
                 sh '''
