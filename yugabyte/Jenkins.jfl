@@ -9,7 +9,6 @@ pipeline {
 
         stage('Initialize Packer') {
             steps {
-<<<<<<< HEAD
                 sh '''
                 echo "HOME is: $HOME"
                 whoami
@@ -18,19 +17,11 @@ pipeline {
                 packer --version
                 packer init yugabyte_docker.pkr.hcl
                 '''
-=======
-                sh 'echo "HOME is: $HOME"'
-                sh 'whoami'
-                sh 'ls -lrt'
-                sh 'cd yugabyte'
-                sh 'packer init yugabyte_docker.pkr.hcl .' // Back to the original command
->>>>>>> 16058f7 (jenkins)
             }
         }
 
         stage('Build YugabyteDB Image') {
             steps {
-<<<<<<< HEAD
                 sh '''
                 cd yugabyte
                 packer build yugabyte_docker.pkr.hcl
@@ -39,12 +30,3 @@ pipeline {
         }
     }
 }
-=======
-                script {
-                    sh "packer build yugabyte_docker.pkr.hcl"
-                }
-            }
-        }
-    }
-}
->>>>>>> 16058f7 (jenkins)
