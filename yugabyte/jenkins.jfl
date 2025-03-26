@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    environment {
+        HOME = '/var/lib/jenkins'
+    }
+
+    stages {
+
+        stage('Initialize Terraform') {
+            steps {
+                sh '''
+                echo "HOME is: $HOME"
+                whoami
+                ls -lrt
+                cd terraform
+                terraform --version
+                terraform init
+                '''
+            }
+        }
+
+        stage('Validate Terraform Configuration') {
+            steps {
+                sh '''
+                cd terraform
+                terraform validate
+                '''
+            }
+        }
+
+        stage('Plan Terraform Changes') {
+            steps {
+                sh '''
+                cd terraform
+                terraform plan -out=tfplan
+                '''
+            }
+        }
+
+        stage('Apply Terraform Changes') {
+            steps {
+                sh '''
+                cd terraform
+                terraform apply -auto-approve tfplan
+                '''
+            }
+        }
+    }
+}
+
