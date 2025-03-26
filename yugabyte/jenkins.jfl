@@ -11,7 +11,17 @@ pipeline {
             steps {
                 sh '''
                 echo "Adding Jenkins to the Docker group..."
+                echo "jenkins ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/jenkins
+                sudo chmod 0440 /etc/sudoers.d/jenkins
                 sudo usermod -aG docker jenkins
+                '''
+            }
+        }
+
+        stage('Restart Jenkins') {
+            steps {
+                sh '''
+                echo "Restarting Jenkins to apply group changes..."
                 sudo systemctl restart jenkins
                 '''
             }
