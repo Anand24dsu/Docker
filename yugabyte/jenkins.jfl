@@ -13,7 +13,7 @@ pipeline {
                 echo "HOME is: $HOME"
                 whoami
                 ls -lrt
-                cd terraform
+                cd yugabyte
                 terraform --version
                 terraform init
                 '''
@@ -23,7 +23,7 @@ pipeline {
         stage('Validate Terraform Configuration') {
             steps {
                 sh '''
-                cd terraform
+                cd yugabyte
                 terraform validate
                 '''
             }
@@ -32,7 +32,7 @@ pipeline {
         stage('Plan Terraform Changes') {
             steps {
                 sh '''
-                cd terraform
+                cd yugabyte
                 terraform plan -out=tfplan
                 '''
             }
@@ -41,7 +41,7 @@ pipeline {
         stage('Apply Terraform Changes') {
             steps {
                 sh '''
-                cd terraform
+                cd yugabyte
                 terraform apply -auto-approve tfplan
                 '''
             }
