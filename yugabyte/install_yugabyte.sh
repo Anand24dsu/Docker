@@ -1,27 +1,29 @@
 #!/bin/bash
 
-# Set environment variables (adjust as needed)
-YB_VERSION=$(cat /packer_cache/variables.pkrvars.json | jq -r '.yb_version')
-YB_INSTALL_DIR=/home/yugabyte/yugabyte-$YB_VERSION
-PATH=$YB_INSTALL_DIR/bin:$PATH
+# Set non-interactive mode for apt
+export DEBIAN_FRONTEND=noninteractive
 
-# Switch to the yugabyte user
-su - yugabyte << EOF
+# Update package lists and install necessary dependencies
+sudo apt-get update && sudo apt-get install -y sudo wget gnupg2 lsb-release python-is-python3 python3
 
-cd /home/yugabyte/yb_build
+# Check Python version
+python3 --version
+
 # Download and extract YugabyteDB
-wget https://downloads.yugabyte.com/yugabyte-ce-${YB_VERSION}-linux-x86_64.tar.gz
-tar -xzf yugabyte-ce-${YB_VERSION}-linux-x86_64.tar.gz
-mv yugabyte-${YB_VERSION} ${YB_INSTALL_DIR}
-rm yugabyte-ce-${YB_VERSION}-linux-x86_64.tar.gz
+YB_VERSION="2024.2.1.0"
+YB_BUILD="b185"
+YB_INSTALL_DIR="/home/yugabyte/yugabyte-${YB_VERSION}"
 
-#run post install
-${YB_INSTALL_DIR}/bin/post_install.sh
+wget "https://downloads.yugabyte.com/releases/${YB_VERSION}/yugabyte-${YB_VERSION}-${YB_BUILD}-linux-x86_64.tar.gz"
+tar xvfz "yugabyte-${YB_VERSION}-${YB_BUILD}-linux-x86_64.tar.gz"
+sudo mv "yugabyte-${YB_VERSION}" /home/yugabyte/
 
-# Create a simple systemd service file (adjust paths as needed)
-# Note: This is a very basic service file.  You'll likely need
-# a more robust one for production.
-cat <<EOT > /home/yugabyte/yugabyte.service
+# Run post-installation script
+cd "$YB_INSTALL_DIR"
+sudo ./bin/post_install.sh
+
+# Create a systemd service file for YugabyteDB
+cat <<EOT | sudo tee /etc/systemd/system/yugabyte.service
 [Unit]
 Description=YugabyteDB
 After=network.target
@@ -36,8 +38,14 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOT
 
-EOF
-# Copy the service file to systemd and enable it
-sudo cp /home/yugabyte/yugabyte.service /etc/systemd/system/
+# Ensure Yugabyte user and necessary directories exist
+sudo useradd -m -s /bin/bash yugabyte || true
+sudo mkdir -p /home/yugabyte/yb_data
+sudo chown -R yugabyte:yugabyte /home/yugabyte
+
+# Reload systemd, enable, and start YugabyteDB service
+sudo systemctl daemon-reload
 sudo systemctl enable yugabyte.service
 sudo systemctl start yugabyte.service
+
+echo "Provisioning complete"

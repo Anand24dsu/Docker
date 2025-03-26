@@ -7,6 +7,7 @@ packer {
   }
 }
 
+# Variables for configuration
 variable "cpus" {
   type    = string
   default = "2"
@@ -28,19 +29,19 @@ variable "yb_version" {
 }
 
 variable "ssh_username" {
-  type = string
+  type    = string
   default = "ubuntu"
 }
 
 variable "ssh_password" {
-  type = string
+  type    = string
   default = "ubuntu"
 }
 
-
+# QEMU Build
 build {
-  name    = "qemu"  // Consistent name
-  sources = ["source.qemu.yugabyte"] // Corrected source reference
+  name    = "qemu"  
+  sources = ["source.qemu.yugabyte"]  
 
   provisioner "shell" {
     inline = [
@@ -62,32 +63,36 @@ build {
   }
 
   provisioner "shell" {
-    scripts           = ["install_yugabyte.sh"]
-    execute_command = "sudo -E -S sh '{{ .Path }}'"
+    scripts          = ["install_yugabyte.sh"]
+    execute_command  = "sudo -E -S sh '{{ .Path }}'"
   }
 }
 
-source "qemu" "yugabyte" { // Corrected name: "yugabyte"
+# QEMU Source Configuration
+source "qemu" "yugabyte" {
   accelerator      = "kvm"
   disk_size        = var.disk_size
   format           = "qcow2"
   headless         = true
-  http_directory   = "http"
- iso_checksum     = "sha256:d7fe3d6a0419667d2f8eff12796996328daa2d4f90cd9f87aa9371b362f987bf"
+  output_directory = "output-ubuntu"
+
+  # Ubuntu Mini ISO for Bionic (18.04)
+  iso_checksum = "sha1:cce936c1f9d1448c7d8f74b76b66f42eb4f93d4a"
   iso_urls = [
-    "https://releases.ubuntu.com/24.04/ubuntu-24.04.2-desktop-amd64.iso"
+    "http://archive.ubuntu.com/ubuntu/dists/bionic/main/installer-amd64/current/images/netboot/mini.iso"
   ]
-  output_directory = "output-ubuntu"  // Changed output directory
-  memory           = var.memory
-  net_device       = "virtio-net"
-  qemuargs = [
+
+  memory     = var.memory
+  net_device = "virtio-net"
+  qemuargs   = [
     ["-m", var.memory],
     ["-smp", var.cpus]
   ]
-   shutdown_command   = "echo ubuntu | sudo -S shutdown -P now"
-  ssh_password       = var.ssh_password # Use variable for password
-  ssh_port           = 22
-  ssh_timeout        = "20m"
-  ssh_username       = var.ssh_username   # Use variable for username
-  vm_name            = "ubuntu-vm"  // Changed VM name
+
+  shutdown_command = "echo '${var.ssh_password}' | sudo -S shutdown -P now"
+  ssh_password     = var.ssh_password
+  ssh_port         = 22
+  ssh_timeout      = "20m"
+  ssh_username     = var.ssh_username
+  vm_name          = "ubuntu-mini"
 }
