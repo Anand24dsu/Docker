@@ -9,17 +9,8 @@ terraform {
 
 provider "docker" {}
 
-resource "docker_network" "yugabyte_network" {
-  name   = "yugabyte_network"
-  driver = "bridge"
-
-  ipam_config {
-    subnet = "192.168.100.0/24"  # Updated subnet to avoid conflicts
-  }
-}
-
 resource "docker_image" "yugabyte" {
-  name         = "yugabyte/yugabyte-db:latest"
+  name         = "yugabyte-db:latest"
   keep_locally = false
 }
 
@@ -27,10 +18,6 @@ resource "docker_container" "yugabyte" {
   name  = "yugabyte-db"
   image = docker_image.yugabyte.name
   restart = "always"
-  networks_advanced {
-    name = docker_network.yugabyte_network.name
-    ipv4_address = "192.168.100.10"  # Assign a fixed IP
-  }
 
   ports {
     internal = 5433
@@ -92,7 +79,7 @@ resource "docker_container" "yugabyte" {
       type        = "ssh"
       user        = "root"
       password    = "root"
-      host        = "192.168.100.10"
+      host        = "localhost"
       port        = 2222
     }
 
@@ -101,5 +88,5 @@ resource "docker_container" "yugabyte" {
     ]
   }
 
-  depends_on = [docker_image.yugabyte, docker_network.yugabyte_network]
+  depends_on = [docker_image.yugabyte]
 }
