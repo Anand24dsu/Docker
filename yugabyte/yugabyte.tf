@@ -10,7 +10,7 @@ terraform {
 provider "docker" {}
 
 resource "docker_image" "yugabyte" {
-  name         = "yugabyte-db:latest"
+  name         = "yugabytedb/yugabyte"
   keep_locally = false
 }
 
